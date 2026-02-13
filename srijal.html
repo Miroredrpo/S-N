@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>For You ❤️</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #ffd6e0, #ffc2d1);
+    overflow: hidden;
+    text-align: center;
+    color: #5a3e4d;
+}
+
+.screen {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.hidden { display: none; }
+
+button {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    background: #ff8fab;
+    color: white;
+    transition: 0.3s;
+    margin-top: 20px;
+}
+
+button:hover { transform: scale(1.1); }
+
+#game-area {
+    position: relative;
+    width: 100%;
+    height: 70vh;
+}
+
+.heart {
+    position: absolute;
+    font-size: 50px;
+    cursor: pointer;
+    animation: fall 8s linear infinite;
+}
+
+@keyframes fall {
+    0% { top: -50px; }
+    100% { top: 100vh; }
+}
+
+.no-btn {
+    background: #999;
+    position: relative;
+}
+
+.box-container {
+    display: flex;
+    gap: 30px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.box {
+    width: 180px;
+    height: 180px;
+    background: #ffb3c6;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    padding: 20px;
+    text-align: center;
+}
+
+.box:hover {
+    transform: scale(1.05);
+    background: #ff8fab;
+    color: white;
+}
+
+.box span {
+    font-size: 14px;
+    margin-top: 10px;
+    font-weight: normal;
+}
+
+.letter {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    width: 70%;
+    max-width: 600px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    line-height: 1.6;
+}
+
+.gallery-container {
+    animation: fadeIn 1.2s ease-out;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.gallery-container img {
+    max-width: 80%;
+    max-height: 60vh;
+    border-radius: 15px;
+    border: 10px solid white;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    object-fit: contain;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.present {
+    font-size: 80px;
+    cursor: pointer;
+}
+
+.confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    opacity: 0.8;
+    border-radius: 50%;
+    animation: confetti-fall 3s linear forwards;
+}
+
+@keyframes confetti-fall {
+    0% { transform: translateY(0) rotate(0deg); opacity:1;}
+    100% { transform: translateY(600px) rotate(360deg); opacity:0;}
+}
+
+.flower {
+    position: absolute;
+    font-size: 40px;
+    opacity: 1;
+    animation: flower-fall 3.5s ease-in-out forwards;
+}
+
+@keyframes flower-fall {
+    0% { 
+        transform: translateY(0) translateX(0) rotate(0deg) scale(0.3); 
+        opacity: 0;
+    }
+    15% {
+        opacity: 1;
+        transform: translateY(-80px) translateX(var(--spread-x)) rotate(var(--rotate)) scale(1.1);
+    }
+    100% { 
+        transform: translateY(700px) translateX(calc(var(--spread-x) + var(--drift))) rotate(calc(var(--rotate) + 720deg)) scale(0.7);
+        opacity: 0;
+    }
+}
+
+@keyframes petal-sway {
+    0%, 100% { transform: translateX(0) rotate(0deg); }
+    25% { transform: translateX(-15px) rotate(-10deg); }
+    75% { transform: translateX(15px) rotate(10deg); }
+}
+</style>
+</head>
+
+<body>
+
+<audio id="heart-sound" src="https://freesound.org/data/previews/522/522640_931655-lq.mp3"></audio>
+<audio id="gift-sound" src="https://freesound.org/data/previews/522/522638_931655-lq.mp3"></audio>
+
+<div id="game-screen" class="screen">
+    <h1>Catch 5 Hearts ❤️</h1>
+    <div id="game-area"></div>
+    <p>Score: <span id="score">0</span>/5</p>
+</div>
+
+<div id="proposal-screen" class="screen hidden">
+    <h1>Will You Be My Valentine? 💖</h1>
+    <div>
+        <button onclick="acceptLove()">YES 💘</button>
+        <button class="no-btn" onmouseover="moveNo()" onclick="clickedNo()">NO 😢</button>
+    </div>
+</div>
+
+<div id="boxes-screen" class="screen hidden">
+    <h1>Choose Your Surprise 🎁</h1>
+    <div class="box-container">
+        <div class="box" onclick="showLetter()">
+            💌 Letter
+            <span>A gentle message from my heart.</span>
+        </div>
+        <div class="box" onclick="showGallery()">
+            📸 Memories
+            <span>Our special moment together.</span>
+        </div>
+        <div class="box" onclick="showPresent()">
+            🎁 Gift
+            <span>A sweet surprise for you.</span>
+        </div>
+    </div>
+</div>
+
+<div id="letter-screen" class="screen hidden">
+    <div class="letter">
+        <h2>मेरी माया 💖</h2>
+        <p>
+        I love you so so much baby, happy valentines day . And i hope you clicked yes(which you did obviously) to be my valentine. This is a very happy day for couples and we are one of them. I am just sad we couldnt spend it together. I am sorry for not typing in capital letters. I hope we never break up for stupid reasons.I cant seem to get enough from writing this because i love you for who you are not for anything else. I am just saying that I will love you forever and ever. ❤️
+        </p>
+    </div>
+    <button onclick="backToBoxes()">Back</button>
+</div>
+
+<div id="gallery-screen" class="screen hidden">
+    <div class="gallery-container">
+        <h2>Our Memory 📸</h2>
+        <img src="srijal&niva.png" alt="Our Special Moment"></img>
+        <p style="margin-top:20px; font-style: italic; font-weight: bold;">
+            "Every moment with you is a treasure."
+        </p>
+    </div>
+    <button onclick="backToBoxes()">Back</button>
+</div>
+    
+<div id="present-screen" class="screen hidden">
+    <h2>Your Special Gift 🎁</h2>
+    <div class="present" onclick="openGift()">🎁</div>
+    <p id="gift-message" class="hidden">
+        Its not that much of a big gift here but I just wanted to say I love you more for ever and ever. ❤️
+    </p>
+    <button onclick="backToBoxes()">Back</button>
+</div>
+
+<script>
+let score = 0;
+const gameArea = document.getElementById("game-area");
+
+function createHeart() {
+    const heart = document.createElement("div");
+    heart.classList.add("heart");
+    heart.innerHTML = "❤️";
+    heart.style.left = Math.random() * 90 + "%";
+    heart.onclick = function() {
+        score++;
+        document.getElementById("score").innerText = score;
+        heart.remove();
+        document.getElementById("heart-sound").play();
+        if(score >= 5) {
+            launchConfetti();
+            setTimeout(startProposal, 500);
+        }
+    };
+    gameArea.appendChild(heart);
+    setTimeout(() => heart.remove(), 8000);
+}
+
+let gameInterval = setInterval(createHeart, 800);
+
+function startProposal() {
+    clearInterval(gameInterval);
+    hideAll();
+    document.getElementById("proposal-screen").classList.remove("hidden");
+}
+
+function moveNo() {
+    const btn = document.querySelector(".no-btn");
+    btn.style.position = "absolute";
+    btn.style.left = Math.random() * (window.innerWidth - 100) + "px";
+    btn.style.top = Math.random() * (window.innerHeight - 50) + "px";
+}
+
+function clickedNo() {
+    // Send Discord webhook notification when NO button is actually clicked
+    sendDiscordMessage("😢 NO! Niva tried to click the NO button!");
+}
+
+function acceptLove() {
+    // Send Discord webhook notification
+    sendDiscordMessage("💘 YES! Niva accepted to be their Valentine!");
+    
+    hideAll();
+    document.getElementById("boxes-screen").classList.remove("hidden");
+    launchConfetti();
+}
+
+function showLetter() { hideAll(); document.getElementById("letter-screen").classList.remove("hidden"); }
+function showGallery() { hideAll(); document.getElementById("gallery-screen").classList.remove("hidden"); }
+function showPresent() { hideAll(); document.getElementById("present-screen").classList.remove("hidden"); }
+
+function openGift() {
+    document.getElementById("gift-message").classList.remove("hidden");
+    document.getElementById("gift-sound").play();
+    launchFlowerBouquet();
+}
+
+function backToBoxes() {
+    hideAll();
+    document.getElementById("boxes-screen").classList.remove("hidden");
+}
+
+function hideAll() {
+    document.querySelectorAll(".screen").forEach(screen => {
+        screen.classList.add("hidden");
+    });
+}
+
+function launchConfetti() {
+    for(let i=0; i<50; i++){
+        const confetti = document.createElement("div");
+        confetti.classList.add("confetti");
+        confetti.style.left = Math.random() * window.innerWidth + "px";
+        confetti.style.backgroundColor = `hsl(${Math.random()*360}, 70%, 60%)`;
+        confetti.style.animationDuration = (2 + Math.random()*2) + "s";
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 4000);
+    }
+}
+
+// Discord webhook function
+function sendDiscordMessage(message) {
+    const webhookURL = "https://discord.com/api/webhooks/1471885771127525529/KGVpeagNQChC-Z5v6uxdu1tGDUtxf85-ftUx5iuD9gc4neEOaPyHBBe0A6MQ9pc_BW0A";
+    
+    fetch(webhookURL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            content: message,
+            username: "Valentine Bot"
+        })
+    }).catch(error => console.log('Webhook error:', error));
+}
+
+function launchFlowerBouquet() {
+    const flowers = ['🌹', '�', '🌹', '🌹', '🌸', '🌸', '🌷', '🌷', '💐', '🌺'];
+    const presentScreen = document.getElementById('present-screen');
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
+    
+    for(let i = 0; i < 80; i++) {
+        setTimeout(() => {
+            const flower = document.createElement('div');
+            flower.classList.add('flower');
+            flower.innerHTML = flowers[Math.floor(Math.random() * flowers.length)];
+            
+            // Much wider spread from center
+            const angle = (Math.random() * 360) * (Math.PI / 180);
+            const distance = Math.random() * 300 + 50;
+            const spreadX = Math.cos(angle) * distance;
+            const drift = (Math.random() - 0.5) * 200; // Random horizontal drift while falling
+            const rotate = Math.random() * 360;
+            const duration = 3 + Math.random() * 2; // Random fall duration
+            
+            flower.style.setProperty('--spread-x', spreadX + 'px');
+            flower.style.setProperty('--drift', drift + 'px');
+            flower.style.setProperty('--rotate', rotate + 'deg');
+            flower.style.left = centerX + 'px';
+            flower.style.top = centerY + 'px';
+            flower.style.animationDuration = duration + 's';
+            
+            presentScreen.appendChild(flower);
+            setTimeout(() => flower.remove(), duration * 1000 + 500);
+        }, i * 30);
+    }
+}
+</script>
+
+</body>
+</html>
